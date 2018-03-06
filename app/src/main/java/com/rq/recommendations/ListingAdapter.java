@@ -1,5 +1,6 @@
 package com.rq.recommendations;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -25,17 +26,11 @@ import retrofit2.Response;
 public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingViewHolder>
 implements Callback<ActiveListings> {
 
+    private MainActivity activity;
     private ActiveListings activeListings;
 
-    @Override
-    public void onResponse(Call<ActiveListings> call, Response<ActiveListings> response) {
-        this.activeListings = (ActiveListings) call;
-        notifyDataSetChanged();
-    }
-
-    @Override
-    public void onFailure(Call<ActiveListings> call, Throwable t) {
-
+    public ListingAdapter(MainActivity activity) {
+        this.activity = activity;
     }
 
     public class ListingViewHolder extends RecyclerView.ViewHolder {
@@ -84,6 +79,21 @@ implements Callback<ActiveListings> {
         else {
             return activeListings.results.length;
         }
+    }
 
+    @Override
+    public void onResponse(Call<ActiveListings> call, Response<ActiveListings> response) {
+        this.activeListings = (ActiveListings) call;
+        notifyDataSetChanged();
+        activity.showList();
+    }
+
+    @Override
+    public void onFailure(Call<ActiveListings> call, Throwable t) {
+        activity.showError();
+    }
+
+    public ActiveListings getActiveListings() {
+        return activeListings;
     }
 }
