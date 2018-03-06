@@ -1,6 +1,5 @@
 package com.rq.recommendations;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -15,9 +14,10 @@ import com.squareup.picasso.Picasso;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
+
 
 /**
  * Created by Faydee on 2018/3/6.
@@ -31,6 +31,18 @@ implements Callback<ActiveListings> {
 
     public ListingAdapter(MainActivity activity) {
         this.activity = activity;
+    }
+
+    @Override
+    public void success(ActiveListings activeListings, Response response) {
+        this.activeListings = activeListings;
+        notifyDataSetChanged();
+        activity.showList();
+    }
+
+    @Override
+    public void failure(RetrofitError error) {
+        activity.showError();
     }
 
     public class ListingViewHolder extends RecyclerView.ViewHolder {
@@ -81,17 +93,7 @@ implements Callback<ActiveListings> {
         }
     }
 
-    @Override
-    public void onResponse(Call<ActiveListings> call, Response<ActiveListings> response) {
-        this.activeListings = (ActiveListings) call;
-        notifyDataSetChanged();
-        activity.showList();
-    }
 
-    @Override
-    public void onFailure(Call<ActiveListings> call, Throwable t) {
-        activity.showError();
-    }
 
     public ActiveListings getActiveListings() {
         return activeListings;

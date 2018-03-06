@@ -13,7 +13,6 @@ import com.rq.recommendations.model.ActiveListings;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import retrofit2.Call;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,17 +38,14 @@ public class MainActivity extends AppCompatActivity {
         }
         else {
             if (savedInstanceState.containsKey(STATE_ACTIVE_LISTINGS)) {
-//                adapter.onResponse((Call<ActiveListings>) savedInstanceState.getParcelable(STATE_ACTIVE_LISTINGS), null);
+                adapter.success((ActiveListings) savedInstanceState.getParcelable(STATE_ACTIVE_LISTINGS), null);
                 showList();
             }
             else {
                 showLoading();
-//                Etsy.getActiveListing(adapter);
+                Etsy.getActiveListing(adapter);
             }
         }
-
-
-
     }
 
     @Override
