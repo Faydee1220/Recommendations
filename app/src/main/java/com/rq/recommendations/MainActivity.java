@@ -1,5 +1,6 @@
 package com.rq.recommendations;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
@@ -9,6 +10,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.rq.recommendations.api.Etsy;
+import com.rq.recommendations.google.GoogleServicesHelper;
 import com.rq.recommendations.model.ActiveListings;
 
 import butterknife.BindView;
@@ -22,7 +24,8 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.progressBar) ProgressBar progressBar;
     @BindView(R.id.errorTextView) TextView errorTextView;
 
-    ListingAdapter adapter;
+    private ListingAdapter adapter;
+    private GoogleServicesHelper googleServicesHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,21 +34,54 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         setRecyclerView();
+        setGoogleServicesHelper();
 
-        if (savedInstanceState == null) {
-            showLoading();
-            Etsy.getActiveListing(adapter);
-        }
-        else {
+        showLoading();
+        if (savedInstanceState != null) {
             if (savedInstanceState.containsKey(STATE_ACTIVE_LISTINGS)) {
                 adapter.success((ActiveListings) savedInstanceState.getParcelable(STATE_ACTIVE_LISTINGS), null);
-                showList();
-            }
-            else {
-                showLoading();
-                Etsy.getActiveListing(adapter);
             }
         }
+
+//        if (savedInstanceState == null) {
+//            showLoading();
+//            Etsy.getActiveListing(adapter);
+//        }
+//        else {
+//            if (savedInstanceState.containsKey(STATE_ACTIVE_LISTINGS)) {
+//                adapter.success((ActiveListings) savedInstanceState.getParcelable(STATE_ACTIVE_LISTINGS), null);
+//                showList();
+//            }
+//            else {
+//                showLoading();
+//                Etsy.getActiveListing(adapter);
+//            }
+//        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        googleServicesHelper.connect();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        googleServicesHelper.disconnect();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode > 65535) {
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+        googleServicesHelper.handleActivityResult(requestCode, resultCode, data);
+        if (requestCode == ListingAdapter.REQUEST_CODE_PLUS_ONE) {
+            adapter.notifyDataSetChanged();
+        }
+
     }
 
     @Override
@@ -64,6 +100,10 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView.LayoutManager layoutManager = new StaggeredGridLayoutManager(1,
                 StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
+    }
+
+    private void setGoogleServicesHelper() {
+        googleServicesHelper = new GoogleServicesHelper(this, adapter);
     }
 
     public void showLoading() {

@@ -1,19 +1,28 @@
 package com.rq.recommendations;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.plus.PlusOneButton;
+import com.google.android.gms.plus.PlusShare;
+import com.rq.recommendations.api.Etsy;
+import com.rq.recommendations.google.GoogleServicesHelper;
 import com.rq.recommendations.model.ActiveListings;
 import com.rq.recommendations.model.Listing;
 import com.squareup.picasso.Picasso;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -24,33 +33,27 @@ import retrofit.client.Response;
  */
 
 public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingViewHolder>
-implements Callback<ActiveListings> {
+implements Callback<ActiveListings>, GoogleServicesHelper.GoogleServicesListener {
+
+    public static final int REQUEST_CODE_PLUS_ONE = 10;
+    public static final int REQUEST_CODE_SHARE = 11;
 
     private MainActivity activity;
     private ActiveListings activeListings;
+    private boolean isGooglePlayServicesAvailable = false;
 
     public ListingAdapter(MainActivity activity) {
         this.activity = activity;
     }
 
-    @Override
-    public void success(ActiveListings activeListings, Response response) {
-        this.activeListings = activeListings;
-        notifyDataSetChanged();
-        activity.showList();
-    }
-
-    @Override
-    public void failure(RetrofitError error) {
-        activity.showError();
-    }
-
     public class ListingViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.listingImageView) ImageView listingImageView;
-        @BindView(R.id.listingTitleTextView) TextView listingTitleTextView;
-        @BindView(R.id.listingShopNameTextView) TextView listingShopNameTextView;
-        @BindView(R.id.listingPriceTextView) TextView listingPriceTextView;
+        @BindView(R.id.listingTitleTextView) TextView titleTextView;
+        @BindView(R.id.listingShopNameTextView) TextView shopNameTextView;
+        @BindView(R.id.listingPriceTextView) TextView priceTextView;
+        @BindView(R.id.listingPlusOneButton) PlusOneButton plusOneButton;
+        @BindView(R.id.listingShareImageButton) ImageButton shareImageButton;
 
         public ListingViewHolder(View itemView) {
             super(itemView);
@@ -59,14 +62,50 @@ implements Callback<ActiveListings> {
 
         public void bindView(int position) {
             Listing listing = activeListings.results[position];
-            listingTitleTextView.setText(listing.title);
-            listingShopNameTextView.setText(listing.Shop.shop_name);
-            listingPriceTextView.setText(listing.price);
+            titleTextView.setText(listing.title);
+            shopNameTextView.setText(listing.Shop.shop_name);
+            priceTextView.setText(listing.price);
 
             Picasso.with(listingImageView.getContext())
                     .load(listing.Images[0].url_570xN)
                     .into(listingImageView);
+
+            if (isGooglePlayServicesAvailable) {
+                plusOneButton.setVisibility(View.VISIBLE);
+                plusOneButton.initialize(listing.url, REQUEST_CODE_PLUS_ONE);
+                plusOneButton.setAnnotation(PlusOneButton.ANNOTATION_NONE);
+            }
+            else {
+                plusOneButton.setVisibility(View.GONE);
+            }
         }
+
+        @OnClick(R.id.listingShareImageButton) void shareButtonPressed() {
+            Listing listing = activeListings.results[getAdapterPosition()];
+            if (isGooglePlayServicesAvailable) {
+                Intent intent = new PlusShare.Builder(activity)
+                        .setType("text/plain")
+                        .setText("Check out this item on Etsy" + listing.title)
+                        .setContentUrl(Uri.parse(listing.url))
+                        .getIntent();
+                activity.startActivityForResult(intent, REQUEST_CODE_SHARE);
+            }
+            else {
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.putExtra(Intent.EXTRA_TEXT, "Check out this item on Etsy" +
+                        listing.title +
+                        " " +
+                        listing.url);
+                intent.setType("text/plain");
+                activity.startActivityForResult(Intent.createChooser(intent, "Share"),
+                        REQUEST_CODE_SHARE);
+
+
+            }
+
+
+        }
+
     }
 
     @NonNull
@@ -93,9 +132,37 @@ implements Callback<ActiveListings> {
         }
     }
 
-
-
     public ActiveListings getActiveListings() {
         return activeListings;
+    }
+
+    @Override
+    public void success(ActiveListings activeListings, Response response) {
+        this.activeListings = activeListings;
+        notifyDataSetChanged();
+        activity.showList();
+    }
+
+    @Override
+    public void failure(RetrofitError error) {
+        activity.showError();
+    }
+
+    @Override
+    public void onConnected() {
+        if (getItemCount() == 0) {
+            Etsy.getActiveListing(this);
+        }
+        isGooglePlayServicesAvailable = true;
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public void onDisconnected() {
+        if (getItemCount() == 0) {
+            Etsy.getActiveListing(this);
+        }
+        isGooglePlayServicesAvailable = false;
+        notifyDataSetChanged();
     }
 }
