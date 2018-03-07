@@ -1,61 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
-
-    <RelativeLayout
+    android:foreground="@drawable/highlight_selector">
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <ImageView
-            android:id="@+id/listingImageView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <com.google.android.gms.plus.PlusOneButton
-            android:id="@+id/listingPlusOneButton"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_alignTop="@id/listingShareImageButton"
-            android:layout_toStartOf="@id/listingShareImageButton"/>
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <ImageButton
-            android:id="@+id/listingShareImageButton"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@drawable/ic_social_share"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true" />
-    </RelativeLayout>
-    
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:id="@+id/listingImageView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scaleType="centerCrop"
+                android:minHeight="150dp"/>
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+            <com.google.android.gms.plus.PlusOneButton
+                android:id="@+id/listingPlusOneButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_alignTop="@id/listingShareImageButton"
+                android:layout_toStartOf="@id/listingShareImageButton"/>
 
-        <TextView
-            android:id="@+id/listingTitleTextView"
+            <ImageButton
+                android:id="@+id/listingShareImageButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_social_share"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true" />
+        </RelativeLayout>
+
+
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:text="Sample Title Listing" />
+            android:padding="4dp"
+            android:background="@android:color/white">
 
-        <TextView
-            android:id="@+id/listingShopNameTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_below="@id/listingTitleTextView"
-            tools:text="Sample Shop Name" />
+            <TextView
+                android:id="@+id/listingTitleTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="Sample Title Listing"
+                android:textColor="@android:color/black"/>
 
-        <TextView
-            android:id="@+id/listingPriceTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_below="@id/listingTitleTextView"
-            tools:text="$19.99" />
+            <TextView
+                android:id="@+id/listingShopNameTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_below="@id/listingTitleTextView"
+                tools:text="Sample Shop Name"
+                android:textColor="@android:color/darker_gray"/>
 
-    </RelativeLayout>
+            <TextView
+                android:id="@+id/listingPriceTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_below="@id/listingTitleTextView"
+                tools:text="$19.99"
+                android:textColor="@android:color/holo_green_dark"/>
 
-</LinearLayout>
+        </RelativeLayout>
+
+    </LinearLayout>
+</FrameLayout>

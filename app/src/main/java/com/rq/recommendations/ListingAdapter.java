@@ -46,7 +46,7 @@ implements Callback<ActiveListings>, GoogleServicesHelper.GoogleServicesListener
         this.activity = activity;
     }
 
-    public class ListingViewHolder extends RecyclerView.ViewHolder {
+    public class ListingViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         @BindView(R.id.listingImageView) ImageView listingImageView;
         @BindView(R.id.listingTitleTextView) TextView titleTextView;
@@ -58,6 +58,7 @@ implements Callback<ActiveListings>, GoogleServicesHelper.GoogleServicesListener
         public ListingViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+            itemView.setOnClickListener(this);
         }
 
         public void bindView(int position) {
@@ -99,13 +100,15 @@ implements Callback<ActiveListings>, GoogleServicesHelper.GoogleServicesListener
                 intent.setType("text/plain");
                 activity.startActivityForResult(Intent.createChooser(intent, "Share"),
                         REQUEST_CODE_SHARE);
-
-
             }
-
-
         }
 
+        @Override
+        public void onClick(View v) {
+            Intent openListing = new Intent(Intent.ACTION_VIEW);
+            openListing.setData(Uri.parse(activeListings.results[getAdapterPosition()].url));
+            activity.startActivity(openListing);
+        }
     }
 
     @NonNull
